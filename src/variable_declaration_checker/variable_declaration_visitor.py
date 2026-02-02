@@ -155,27 +155,16 @@ class VariableDeclarationVisitor(ast.NodeVisitor):
 
         self.__current_scope = self.__current_scope.create_sub_scope(False, False, node.name == "__init__")
         
-        if is_self:
-            decorator: ast.expr
-            for decorator in node.decorator_list:
-                if not isinstance(decorator, ast.Name):
-                    continue
-                if decorator.id == "staticmethod":
-                    is_self = False
-                    break
-
         def deal_arg(node: ast.arg | None):
             if node is None:
                 return
             
             nonlocal is_self
-
-            self.__found_variable_any_node(node, 
-                                           is_self or (node.annotation is not None), 
-                                           node.arg)
-            
-            if is_self:
+            consider_annotated: bool = node.annotation is not None
+            if (not consider_annotated) and is_self:
+                consider_annotated = (node.arg == "self") or (node.arg == "cls")
                 is_self = False
+            self.__found_variable_any_node(node, consider_annotated, node.arg)
             
         argument: ast.arg
         for argument in node.args.posonlyargs:
