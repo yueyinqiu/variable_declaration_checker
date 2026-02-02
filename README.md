@@ -1,20 +1,15 @@
-# variable_declaration_check
+# variable_declaration_checker
+
+> We have migrated to Flake8 as Pylint's performance becomes a bottleneck on larger projects. Since our workflow focuses on file-by-file linting rather than cross-module dependency checks, Flake8 is a better fit. If you still prefer Pylint, use `variable-declaration-checker==0.0.7`.
 
 Installation:
 
 ```shell
-pip install pylint
-pip install variable-declaration-check
+pip install variable-declaration-checker
 ```
 
 Usage:
 
 ```shell
-pylint --load-plugins=variable_declaration_checker my_python_script.py
-```
-
-To disable other checks of pylint:
-
-```shell
-pylint --load-plugins=variable_declaration_checker --disable=all --enable=un-declared-variable --enable=re-declared-variable my_python_script.py
+flake8 --select WVarDec
 ```

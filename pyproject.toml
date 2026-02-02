@@ -1,0 +1,24 @@
+[project]
+name = "variable-declaration-checker"
+version = "0.1.0"
+description = "A flake8 plugin that forces your variable to be declared, and not duplicately declared."
+readme = "README.md"
+authors = [
+    { name = "yueyinqiu", email = "yueyinqiu@outlook.com"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "flake8>=7.3.0",
+]
+license = { text = "MIT License" }
+keywords = []
+
+[project.urls]
+Repository = "https://github.com/yueyinqiu/variable_declaration_checker.git"
+
+[build-system]
+requires = ["uv_build>=0.9.28,<0.10.0"]
+build-backend = "uv_build"
+
+[project.entry-points."flake8.extension"]
+VDC = "variable_declaration_checker:Flake8VariableDeclarationChecker"
