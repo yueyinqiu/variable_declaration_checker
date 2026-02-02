@@ -5,7 +5,7 @@
 		}
 	],
 	"settings": {
-		"python-envs.defaultEnvManager": "ms-python.python:venv",
-		"python-envs.defaultPackageManager": "ms-python.python:pip"
+		"flake8.importStrategy": "fromEnvironment",
+		"flake8.enabled": true
 	}
 }

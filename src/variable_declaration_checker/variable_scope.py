@@ -2,11 +2,16 @@ class VariableScope:
     def __init__(self, 
                  parent: 'VariableScope | None',
                  is_class: bool, 
+                 is_enum_class: bool,
                  is_class_init: bool) -> None:
         self.__parent = parent
         self.__variables: set[str] = set()
         self.__is_class: bool = is_class
+        self.__is_enum_class: bool = is_enum_class
         self.__is_class_init: bool = is_class_init
+
+    def is_enum_class(self):
+        return self.__is_enum_class
 
     def is_class(self):
         return self.__is_class
@@ -45,8 +50,8 @@ class VariableScope:
     def remove_variable(self, name: str):
         self.__variables.discard(name)
 
-    def create_sub_scope(self, is_class: bool, is_init_function: bool):
-        return VariableScope(self, is_class, self.__is_class and is_init_function)
+    def create_sub_scope(self, is_class: bool, is_enum_class: bool, is_init_function: bool):
+        return VariableScope(self, is_class, is_enum_class, self.__is_class and is_init_function)
 
     def get_parent_scope(self):
         assert self.__parent is not None

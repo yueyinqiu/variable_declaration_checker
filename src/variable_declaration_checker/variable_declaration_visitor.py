@@ -8,7 +8,7 @@ class VariableDeclarationVisitor(ast.NodeVisitor):
     def __init__(self):
         self.__result_un_declared: list[VisitResult] = []
         self.__result_re_declared: list[VisitResult] = []
-        self.__current_scope: VariableScope = VariableScope(None, False, False)
+        self.__current_scope: VariableScope = VariableScope(None, False, False, False)
 
     def get_visit_result(self, clear: bool = True):
         un_declared: list[VisitResult]  = self.__result_un_declared
@@ -44,7 +44,7 @@ class VariableDeclarationVisitor(ast.NodeVisitor):
                 })
 
     def visit_Module(self, node: ast.Module):
-        self.__current_scope = self.__current_scope.create_sub_scope(False, False)
+        self.__current_scope = self.__current_scope.create_sub_scope(False, False, False)
         self.generic_visit(node)
         self.__current_scope = self.__current_scope.get_parent_scope()
 
@@ -68,7 +68,7 @@ class VariableDeclarationVisitor(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign):
         def deal_target(target: ast.expr):
             if isinstance(target, ast.Name):
-                self.__found_variable(target, False)
+                self.__found_variable(target, self.__current_scope.is_enum_class())
             elif isinstance(target, ast.Tuple | ast.List):
                 for target in target.elts:
                     deal_target(target)
@@ -153,7 +153,7 @@ class VariableDeclarationVisitor(ast.NodeVisitor):
 
         is_self: bool = self.__current_scope.is_class()
 
-        self.__current_scope = self.__current_scope.create_sub_scope(False, node.name == "__init__")
+        self.__current_scope = self.__current_scope.create_sub_scope(False, False, node.name == "__init__")
         
         if is_self:
             decorator: ast.expr
@@ -202,7 +202,20 @@ class VariableDeclarationVisitor(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef):
         self.__found_variable_any_node(node, True, node.name)
         
-        self.__current_scope = self.__current_scope.create_sub_scope(True, False)
+        is_enum: bool = False
+        enum_bases: set[str] = {"Enum", "IntEnum", "StrEnum", "Flag", "IntFlag", "ReprEnum"}
+        base: ast.expr
+        for base in node.bases:
+            if isinstance(base, ast.Name):
+                if base.id in enum_bases:
+                    is_enum = True
+                    break
+            if isinstance(base, ast.Attribute) and isinstance(base.value, ast.Name):
+                if (base.value.id == "enum") and (base.attr in enum_bases):
+                    is_enum = True
+                    break
+
+        self.__current_scope = self.__current_scope.create_sub_scope(True, is_enum, False)
 
         self.generic_visit(node)
         self.__current_scope = self.__current_scope.get_parent_scope()
